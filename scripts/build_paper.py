@@ -18,7 +18,7 @@ DOCS_IMG_DIR = DOCS_DIR / "img"
 # ---- EDIT THESE THREE LINES ----
 AUTHOR_NAME = "Fariha Zaman"
 GITHUB_REPO_URL = "https://github.com/titlyzaman25/flyrank-internship"
-CONTACT_LINK = ""  # optional: LinkedIn/portfolio URL, or leave blank
+CONTACT_LINK = "farihaorpa25@gmail.com"  # optional: LinkedIn/portfolio URL, or leave blank
 # ---------------------------------
 
 
