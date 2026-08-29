@@ -16,7 +16,7 @@ DOCS_DIR = REPO_ROOT / "docs"
 DOCS_IMG_DIR = DOCS_DIR / "img"
 
 # ---- EDIT THESE THREE LINES ----
-AUTHOR_NAME = "Your Name"
+AUTHOR_NAME = "Fariha Zaman"
 GITHUB_REPO_URL = "https://github.com/titlyzaman25/flyrank-internship"
 CONTACT_LINK = ""  # optional: LinkedIn/portfolio URL, or leave blank
 # ---------------------------------
