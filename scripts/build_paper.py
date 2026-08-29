@@ -290,7 +290,7 @@ def main():
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     html = build_html(metrics)
     out_path = DOCS_DIR / "index.html"
-    out_path.write_text(html)
+    out_path.write_text(html, encoding="utf-8")
     print(f"Wrote {out_path}")
     print(f"Copied figures: {copied}")
     print("\nNext: edit AUTHOR_NAME at the top of this script if you haven't, then:")
