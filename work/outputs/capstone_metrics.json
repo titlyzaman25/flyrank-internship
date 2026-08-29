@@ -1,0 +1,23 @@
+{
+  "question": "Can pre-refresh signals predict next-month click activity well enough to prioritize review?",
+  "n_rows_scored": 331436,
+  "grouped_test_precision": 0.9311123658949746,
+  "grouped_test_recall": 0.5097372488408037,
+  "grouped_test_f1": 0.6588094286855773,
+  "grouped_test_roc_auc": 0.9199891602369542,
+  "baseline_precision": 0.2950358599353115,
+  "baseline_recall": 0.648531684698609,
+  "baseline_f1": 0.40556736903150975,
+  "baseline_roc_auc": 0.614440812795502,
+  "random_split_auc_for_comparison": 0.9203932748113208,
+  "label_base_rate": 0.18736045571392365,
+  "reason_code_counts": {
+    "REVIEW_QUEUE": 150193,
+    "MONITOR_ONLY": 90292,
+    "MAINTAIN_MONITOR": 56316,
+    "NO_ACTION_LOW_VALUE": 20187,
+    "STRIKING_DISTANCE_PUSH": 14445,
+    "REFRESH_PRIORITY": 3
+  },
+  "share_needing_human_review": 0.8177958942299569
+}
