@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Can Pre-Refresh Content Signals Predict Next-Month Click Activity?</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#5a5a5a; --line:#e2e2e2; --accent:#0b5fff; --bg:#fdfdfb; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink); background: var(--bg); line-height: 1.6;
+    max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 6rem;
+  }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin-bottom: 0.25rem; }
+  h2 {
+    font-size: 1.3rem; margin-top: 3rem; padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+  .byline { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  .abstract {
+    background: #f3f5fb; border-left: 3px solid var(--accent);
+    padding: 1rem 1.25rem; border-radius: 4px; font-size: 1.02rem;
+  }
+  p { margin: 0.9rem 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  figure { margin: 1.5rem 0; }
+  figure img { width: 100%; border-radius: 6px; border: 1px solid var(--line); }
+  figcaption { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+  .stat { font-weight: 600; color: var(--accent); }
+  .note {
+    background: #fff8e6; border-left: 3px solid #d9a300;
+    padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.92rem; margin: 1rem 0;
+  }
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.35rem 0; }
+  a { color: var(--accent); }
+  .credit {
+    margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Can Pre-Refresh Content Signals Predict Next-Month Click Activity?</h1>
+<p class="byline">Your Name · FlyRank ML Internship Capstone</p>
+
+<div class="abstract">
+<strong>Abstract.</strong> This paper asks whether pre-refresh content signals — search
+position, engagement, and freshness — can predict which pages will earn clicks the
+following month, using 331,436 content items from FlyRank's internal
+warehouse. A logistic regression model was trained on March 2026 features against an
+April 2026 outcome label, validated on clients held out entirely from training. Under
+that grouped-by-client split, the model reached a ROC-AUC of 0.920
+against a rule baseline's 0.614 and a label base rate of
+18.7%. A parallel naive-split check found no meaningful gap versus
+the grouped split, suggesting the result is not an artifact of client-level leakage. The
+output is a ranked, reason-coded action queue intended as decision-support for content
+editors, not an autonomous system.
+</div>
+
+<h2>Introduction</h2>
+<p>
+Content teams cannot refresh every page every month. The question this project answers:
+Can pre-refresh signals predict next-month click activity well enough to prioritize review? A working answer turns a flat backlog into a ranked queue an editor can
+work down with reasons attached, instead of guessing which pages are worth the time.
+</p>
+
+<h2>Data</h2>
+<p>
+Source: <code>FlyRank/internship-warehouse</code> (Hugging Face, build v20260703),
+tables <code>fact_content_daily_performance</code> (month=2026-03, month=2026-04) and
+<code>dim_content</code>. Feature window: March 2026. Label window: April 2026 —
+strictly the following month, so every feature is knowable before the outcome it predicts.
+</p>
+<p>
+Excluded from this study: <code>fact_content_query_90d</code> (its 90-day window overlaps
+the label period and was not worth the added alignment work for this pass);
+<code>fact_content_daily_performance_sample</code> (June 2026, reserved as a sealed test
+month and deliberately untouched); all months outside March–April 2026, to keep this study
+to one clean past-to-future pair. 331,436 content items had a matching row
+in both months and form the modeled population — essentially all of them (fewer than 5
+items were dropped for lacking an April row), so survivorship bias is negligible here.
+</p>
+
+<h2>Methodology</h2>
+<p>
+<strong>Label:</strong> did the content earn at least one click in April 2026? A binary
+outcome, base rate 18.7%.
+</p>
+<p>
+<strong>Features:</strong> March search impressions, clicks, average position, GA4
+sessions and engagement time, click-through rate, and days since last content update —
+all measured strictly before the label window.
+</p>
+<p>
+<strong>Baseline:</strong> a transparent hand-written rule — flag content as stale
+(≥181 days since update) or below its position tier's expected CTR (computed from
+training data only, to avoid leaking test-set information into the rule).
+</p>
+<p>
+<strong>Validation design:</strong> GroupShuffleSplit by client, 80/20 — no client
+appears in both train and test. A naive random 80/20 split was also run for comparison (ROC-AUC 0.920 vs. 0.920 grouped by client) — the two are nearly identical (a gap of 0.0004), which is itself a finding: in this dataset, client identity was not doing meaningful work the model could "cheat" with, so the grouped-split number can be trusted as close to the naive one, not treated as a correction of a large inflation.
+</p>
+<p>
+<strong>Leakage checks:</strong> features and label sit in strictly non-overlapping
+months; no product-flag or composite-score columns were used as features; the modeled
+population retains essentially the full March cohort, so the survivorship filter
+introduces negligible bias.
+</p>
+
+<h2>Results</h2>
+<figure>
+  <img src="img/results_comparison.png" alt="Model vs baseline comparison chart">
+  <figcaption>Logistic regression vs. the rule baseline, same grouped test split, same base rate.</figcaption>
+</figure>
+<table>
+<tr><th>Method</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th></tr>
+<tr>
+  <td>Rule baseline</td>
+  <td>0.295</td>
+  <td>0.649</td>
+  <td>0.406</td>
+  <td>0.614</td>
+</tr>
+<tr>
+  <td>Logistic Regression (grouped split)</td>
+  <td>0.931</td>
+  <td>0.510</td>
+  <td>0.659</td>
+  <td>0.920</td>
+</tr>
+</table>
+<p>
+Base rate: 18.7%. Every metric above is read against this number —
+a bare accuracy figure without it would overstate the model's contribution. The model
+shows materially higher precision than the rule baseline (0.931
+vs. 0.295) at somewhat lower recall
+(0.510 vs. 0.649) — it flags fewer items,
+but is right more often when it does.
+</p>
+
+<h2>Limitations</h2>
+<ul>
+<li><strong>Observational, not causal.</strong> No experiment was run. Nothing here
+supports "refreshing X will produce Y" — only that pages like this were associated with
+clicks in this portfolio.</li>
+<li><strong>Single two-month window.</strong> March→April 2026 only; no test across
+seasons or a longer horizon yet.</li>
+<li><strong>Single portfolio.</strong> Findings describe this one company's data and do
+not generalize elsewhere without re-validation.</li>
+<li><strong>The REFRESH_PRIORITY category is nearly empty</strong> (3 of
+331,436 items). In this dataset, stale content's mean predicted potential
+is close to zero, so very little stale content also clears the "still promising" bar this
+category requires. Read as a real pattern in this portfolio — stale content here rarely
+looks salvageable by this model — not a bug in the queue logic, but worth re-examining
+the tier thresholds before relying on this category operationally.</li>
+<li><strong>Validated numbers are the grouped-split test metrics above.</strong> The
+random-split comparison exists to check for leakage, not as an alternate performance
+claim.</li>
+</ul>
+
+<h2>Ranked Recommendations</h2>
+<figure>
+  <img src="img/reason_code_distribution.png" alt="Reason code distribution chart">
+  <figcaption>How the 331,436-item queue splits across reason codes.</figcaption>
+</figure>
+<figure>
+  <img src="img/freshness_insight.png" alt="Predicted potential by freshness tier">
+  <figcaption>Observed relationship between freshness and predicted potential in this portfolio — stale content scores near zero, which is also why the REFRESH_PRIORITY bucket above is nearly empty.</figcaption>
+</figure>
+<table>
+<tr><th>Reason code</th><th>Count</th></tr>
+<tr><td>REVIEW_QUEUE</td><td>150,193</td></tr>
+<tr><td>MONITOR_ONLY</td><td>90,292</td></tr>
+<tr><td>MAINTAIN_MONITOR</td><td>56,316</td></tr>
+<tr><td>NO_ACTION_LOW_VALUE</td><td>20,187</td></tr>
+<tr><td>STRIKING_DISTANCE_PUSH</td><td>14,445</td></tr>
+<tr><td>REFRESH_PRIORITY</td><td>3</td></tr>
+</table>
+<div class="note">
+Most of the queue (45.3%)
+falls into REVIEW_QUEUE — items that didn't cleanly match a defined archetype. These are
+explicitly routed to human judgment rather than assigned an automated action, by design.
+</div>
+<p>
+<span class="stat">81.8%</span> of the queue is flagged
+for mandatory human review before any suggestion reaches an editor. Every row is
+decision-support, not an instruction: an editor confirms page content, voice, and
+compliance before acting. Nothing in this queue should trigger auto-publishing,
+auto-deprioritization of budget, client-facing performance guarantees, or individual
+writer evaluation.
+</p>
+
+<h2>Reproducibility</h2>
+<p>
+Full pipeline, notebooks, and this page's generator script:
+<a href="https://github.com/titlyzaman25/flyrank-internship">https://github.com/titlyzaman25/flyrank-internship</a>. Relevant notebooks:
+<code>work/notebooks/w05_model.ipynb</code>,
+<code>work/notebooks/w06_validation_audit.ipynb</code>,
+<code>work/notebooks/w07_action_playbook.ipynb</code>,
+<code>work/notebooks/capstone.ipynb</code>. Random seed: 42, fixed across every split and
+model in this study.
+</p>
+
+<div class="credit">
+Built on the FlyRank ML Internship dataset —
+<a href="https://flyrank.ai">https://flyrank.ai</a>
+</div>
+
+</body>
+</html>
