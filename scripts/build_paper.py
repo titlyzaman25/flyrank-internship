@@ -122,24 +122,33 @@ def build_html(m):
 <p class="byline">{AUTHOR_NAME} · FlyRank ML Internship Capstone{f' · <a href="{CONTACT_LINK}">Contact</a>' if CONTACT_LINK else ''}</p>
 
 <div class="abstract">
-<strong>Abstract.</strong> This paper asks whether pre-refresh content signals — search
-position, engagement, and freshness — can predict which pages will earn clicks the
-following month, using {m['n_rows_scored']:,} content items from FlyRank's internal
-warehouse. A logistic regression model was trained on March 2026 features against an
-April 2026 outcome label, validated on clients held out entirely from training. Under
-that grouped-by-client split, the model reached a ROC-AUC of {num(m['grouped_test_roc_auc'])}
-against a rule baseline's {num(m['baseline_roc_auc'])} and a label base rate of
-{pct(m['label_base_rate'])}. A parallel naive-split check found no meaningful gap versus
-the grouped split, suggesting the result is not an artifact of client-level leakage. The
-output is a ranked, reason-coded action queue intended as decision-support for content
-editors, not an autonomous system.
+<strong>Abstract.</strong> A content team managing hundreds of thousands of pages across
+dozens of brands cannot manually review every page every month — someone has to decide
+what to look at first. This paper tests whether pre-refresh signals — search position,
+engagement, and freshness — can predict which of {m['n_rows_scored']:,} content pieces
+will earn clicks the following month, using FlyRank's internal warehouse data. A logistic
+regression model was trained on March 2026 features against an April 2026 outcome label,
+validated on clients held out entirely from training. Under that grouped-by-client split,
+the model reached a ROC-AUC of {num(m['grouped_test_roc_auc'])} against a rule baseline's
+{num(m['baseline_roc_auc'])} and a label base rate of {pct(m['label_base_rate'])}. The
+output is a ranked, reason-coded action queue intended to turn an unmanageable backlog
+into a shortlist an editor can work through — decision-support, not an autonomous system.
 </div>
 
 <h2>Introduction</h2>
 <p>
-Content teams cannot refresh every page every month. The question this project answers:
-{m['question']} A working answer turns a flat backlog into a ranked queue an editor can
-work down with reasons attached, instead of guessing which pages are worth the time.
+Picture a content lead staring at a spreadsheet of tens of thousands of pages, a
+refresh budget for maybe a few dozen this month, and no principled way to choose. Pick
+wrong — refresh pages that were never going to earn clicks anyway — and the budget is
+wasted. Pick by gut feel, and the same senior pages keep getting attention while
+genuinely promising content quietly decays. This is the real FlyRank content problem:
+{m['n_rows_scored']:,} content items across a multi-brand portfolio, and no scalable way
+to prioritize which ones are worth a human's time this cycle.
+</p>
+<p>
+The question this project answers: can pre-refresh signals predict next-month click
+activity well enough to prioritize that review, turning a flat, unmanageable backlog into
+a ranked queue with reasons attached — instead of a spreadsheet nobody can act on?
 </p>
 
 <h2>Data</h2>
